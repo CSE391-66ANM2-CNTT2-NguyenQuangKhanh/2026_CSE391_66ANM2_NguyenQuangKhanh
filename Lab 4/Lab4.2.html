@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Form Validation Demo</title>
+
+<style>
+body{
+font-family: Arial;
+margin:40px;
+}
+
+h2{
+margin-top:40px;
+}
+
+input,select{
+padding:6px;
+margin-top:4px;
+}
+
+.field{
+margin-bottom:12px;
+}
+
+.error{
+color:red;
+font-size:13px;
+display:none;
+}
+
+.success{
+color:green;
+font-weight:bold;
+}
+
+.invalid{
+border:2px solid red;
+}
+
+.valid{
+border:2px solid green;
+}
+
+#confirmBox{
+border:1px solid #ccc;
+padding:15px;
+margin-top:15px;
+display:none;
+background:#f5f5f5;
+}
+
+#noteCount{
+font-size:13px;
+color:gray;
+}
+</style>
+
+</head>
+
+<body>
+
+<h2>Đăng ký tài khoản</h2>
+
+<form id="registerForm">
+
+<div class="field">
+<label>Họ và tên</label><br>
+<input id="fullname" required>
+<br>
+<span class="error" id="fullnameError"></span>
+</div>
+
+<div class="field">
+<label>Email</label><br>
+<input id="email">
+<br>
+<span class="error" id="emailError"></span>
+</div>
+
+<div class="field">
+<label>SĐT</label><br>
+<input id="phone">
+<br>
+<span class="error" id="phoneError"></span>
+</div>
+
+<div class="field">
+<label>Mật khẩu</label><br>
+<input type="password" id="password">
+<br>
+<span class="error" id="passwordError"></span>
+</div>
+
+<div class="field">
+<label>Xác nhận mật khẩu</label><br>
+<input type="password" id="confirm">
+<br>
+<span class="error" id="confirmError"></span>
+</div>
+
+<div class="field">
+<label>Giới tính</label><br>
+<input type="radio" name="gender" value="Nam">Nam
+<input type="radio" name="gender" value="Nữ">Nữ
+<br>
+<span class="error" id="genderError"></span>
+</div>
+
+<div class="field">
+<input type="checkbox" id="terms"> Tôi đồng ý điều khoản
+<br>
+<span class="error" id="termsError"></span>
+</div>
+
+<button type="submit">Đăng ký</button>
+
+</form>
+
+<div id="successMsg"></div>
+
+
+
+<h2>Đặt hàng</h2>
+
+<form id="orderForm">
+
+<div class="field">
+<label>Sản phẩm</label><br>
+<select id="product">
+<option value="">-- Chọn sản phẩm --</option>
+<option>Áo</option>
+<option>Quần</option>
+<option>Giày</option>
+</select>
+<br>
+<span class="error" id="productError"></span>
+</div>
+
+<div class="field">
+<label>Số lượng</label><br>
+<input type="number" id="qty">
+<br>
+<span class="error" id="qtyError"></span>
+</div>
+
+<div class="field">
+<label>Ngày giao</label><br>
+<input type="date" id="date">
+<br>
+<span class="error" id="dateError"></span>
+</div>
+
+<div class="field">
+<label>Địa chỉ</label><br>
+<input id="address">
+<br>
+<span class="error" id="addressError"></span>
+</div>
+
+<div class="field">
+<label>Ghi chú</label><br>
+<textarea id="note"></textarea>
+<br>
+<span id="noteCount">0/200</span>
+<br>
+<span class="error" id="noteError"></span>
+</div>
+
+<div class="field">
+<label>Thanh toán</label><br>
+<input type="radio" name="pay" value="COD">COD
+<input type="radio" name="pay" value="CK">Chuyển khoản
+<input type="radio" name="pay" value="Ví">Ví điện tử
+<br>
+<span class="error" id="payError"></span>
+</div>
+
+<p>Tổng tiền: <b id="total">0</b> VND</p>
+<button type="submit">Đặt hàng</button>
+
+</form>
+
+<div id="confirmBox">
+<p id="summary"></p>
+<button id="confirmBtn">Xác nhận</button>
+<button onclick="document.getElementById('confirmBox').style.display='none'">Hủy</button>
+</div>
+
+
+
+<script>
+
+/* ===== Regex ===== */
+
+const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex=/^0[0-9]{9}$/;
+const nameRegex=/^[a-zA-ZÀ-ỹ\s]+$/;
+const passRegex=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+
+/* ===== Helper ===== */
+
+function showError(id,msg){
+let span=document.getElementById(id+"Error");
+span.textContent=msg;
+span.style.display="block";
+document.getElementById(id).classList.add("invalid");
+}
+
+function clearError(id){
+let span=document.getElementById(id+"Error");
+span.style.display="none";
+document.getElementById(id).classList.remove("invalid");
+document.getElementById(id).classList.add("valid");
+}
+
+
+/* ===== Validate register ===== */
+
+function validateFullname(){
+let v=fullname.value.trim();
+if(v.length<3 || !nameRegex.test(v)){
+showError("fullname","Tên không hợp lệ");
+return false;
+}
+clearError("fullname");
+return true;
+}
+
+function validateEmail(){
+if(!emailRegex.test(email.value)){
+showError("email","Email sai");
+return false;
+}
+clearError("email");
+return true;
+}
+
+function validatePhone(){
+if(!phoneRegex.test(phone.value)){
+showError("phone","SĐT sai");
+return false;
+}
+clearError("phone");
+return true;
+}
+
+function validatePassword(){
+if(!passRegex.test(password.value)){
+showError("password","Mật khẩu yếu");
+return false;
+}
+clearError("password");
+return true;
+}
+
+function validateConfirm(){
+if(confirm.value!==password.value){
+showError("confirm","Không khớp");
+return false;
+}
+clearError("confirm");
+return true;
+}
+
+
+/* ===== Submit register ===== */
+
+registerForm.addEventListener("submit",function(e){
+
+e.preventDefault();
+
+let ok=
+validateFullname() &
+validateEmail() &
+validatePhone() &
+validatePassword() &
+validateConfirm();
+
+if(ok){
+
+registerForm.style.display="none";
+
+successMsg.innerHTML=
+"<p class='success'>Đăng ký thành công 🎉 "+fullname.value+"</p>";
+
+}
+
+});
+
+
+/* ===== Order form ===== */
+
+const prices={
+"Áo":150000,
+"Quần":200000,
+"Giày":500000
+};
+
+function calcTotal(){
+
+let p=product.value;
+let q=qty.value;
+
+if(prices[p] && q){
+
+let total=prices[p]*q;
+
+document.getElementById("total").textContent=
+total.toLocaleString("vi-VN");
+
+}
+
+}
+
+product.addEventListener("change",calcTotal);
+qty.addEventListener("input",calcTotal);
+
+
+/* ===== Note counter ===== */
+
+note.addEventListener("input",function(){
+
+let len=this.value.length;
+
+noteCount.textContent=len+"/200";
+
+if(len>200){
+noteCount.style.color="red";
+}else{
+noteCount.style.color="gray";
+}
+
+});
+
+
+/* ===== Submit order ===== */
+
+orderForm.addEventListener("submit",function(e){
+
+e.preventDefault();
+
+let p=product.value;
+let q=qty.value;
+
+if(!p){
+productError.textContent="Chọn sản phẩm";
+productError.style.display="block";
+return;
+}
+
+let total=prices[p]*q;
+
+summary.innerHTML=
+"Sản phẩm: "+p+
+"<br>Số lượng: "+q+
+"<br>Tổng tiền: "+total.toLocaleString("vi-VN")+
+"<br>Ngày giao: "+date.value;
+
+confirmBox.style.display="block";
+
+});
+
+
+confirmBtn.onclick=function(){
+
+confirmBox.innerHTML="<p class='success'>Đặt hàng thành công 🎉</p>";
+
+};
+
+</script>
+
+</body>
+</html>

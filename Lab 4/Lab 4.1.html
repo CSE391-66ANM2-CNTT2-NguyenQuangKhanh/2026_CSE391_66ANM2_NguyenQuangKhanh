@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Danh sách sinh viên</title>
+
+<style>
+.low{
+background-color: yellow;
+}
+
+table{
+border-collapse: collapse;
+}
+
+td,th{
+padding:5px 10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div>
+<input type="text" id="name" placeholder="Họ tên...">
+</div>
+
+<div>
+<input type="number" id="score" placeholder="Điểm">
+</div>
+
+<div>
+<button onclick="addStudent()">Thêm</button>
+</div>
+
+<br>
+
+<input type="text" id="search" placeholder="Tìm sinh viên...">
+
+<select id="filter">
+<option value="all">Tất cả</option>
+<option value="Giỏi">Giỏi</option>
+<option value="Khá">Khá</option>
+<option value="Trung bình">Trung bình</option>
+<option value="Yếu">Yếu</option>
+</select>
+
+<div id="result"></div>
+
+<p id="stat"></p>
+
+<script>
+
+let students = [];
+
+let searchText = "";
+let filterType = "all";
+let sortOrder = null;
+
+
+//Tạo bảng
+function createTable(){
+
+document.getElementById("result").innerHTML =
+
+`<table border="1">
+<thead>
+<tr>
+<td>STT</td>
+<td>Họ tên</td>
+<td onclick="sortByScore()" style="cursor:pointer">
+Điểm <span id="arrow"></span>
+</td>
+<td>Xếp loại</td>
+<td>Thao tác</td>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>`;
+
+}
+
+createTable();
+
+
+//Thêm sinh viên
+function addStudent(){
+
+var name = document.getElementById("name").value.trim();
+var score = parseFloat(document.getElementById("score").value);
+
+if(name == "" || isNaN(score)){
+alert("Không được để trống tên hoặc điểm");
+return;
+}
+
+if(score < 0 || score > 10){
+alert("Điểm phải từ 0 đến 10");
+return;
+}
+
+students.push({name,score});
+
+renderTable();
+
+document.getElementById("name").value="";
+document.getElementById("score").value="";
+}
+
+
+//Xếp loại
+function classify(score){
+
+if(score >= 8.5) return "Giỏi";
+if(score >= 7) return "Khá";
+if(score >= 5) return "Trung bình";
+return "Yếu";
+
+}
+
+
+//Tìm kiếm
+document.getElementById("search").addEventListener("input",function(){
+
+searchText = this.value.toLowerCase();
+
+renderTable();
+
+});
+
+
+//Lọc
+document.getElementById("filter").addEventListener("change",function(){
+
+filterType = this.value;
+
+renderTable();
+
+});
+
+
+//Sắp xếp
+function sortByScore(){
+
+if(sortOrder === "asc"){
+sortOrder = "desc";
+}else{
+sortOrder = "asc";
+}
+
+renderTable();
+
+}
+
+
+//Vẽ bảng
+function renderTable(){
+
+let tbody = document.getElementById("tableBody");
+
+tbody.innerHTML="";
+
+let data = [...students];
+
+
+//SEARCH
+if(searchText){
+
+data = data.filter(sv =>
+sv.name.toLowerCase().includes(searchText)
+);
+
+}
+
+
+//FILTER
+if(filterType !== "all"){
+
+data = data.filter(sv =>
+classify(sv.score) === filterType
+);
+
+}
+
+
+//SORT
+if(sortOrder === "asc"){
+
+data.sort((a,b)=>a.score-b.score);
+
+document.getElementById("arrow").textContent="▲";
+
+}
+
+else if(sortOrder === "desc"){
+
+data.sort((a,b)=>b.score-a.score);
+
+document.getElementById("arrow").textContent="▼";
+
+}
+
+
+//Không có kết quả
+if(data.length === 0){
+
+tbody.innerHTML =
+
+`<tr>
+<td colspan="5">Không có kết quả</td>
+</tr>`;
+
+return;
+
+}
+
+
+let total = 0;
+
+data.forEach(function(sv,index){
+
+let tr = document.createElement("tr");
+
+if(sv.score < 5){
+tr.classList.add("low");
+}
+
+tr.innerHTML =
+
+`<td>${index+1}</td>
+<td>${sv.name}</td>
+<td>${sv.score}</td>
+<td>${classify(sv.score)}</td>
+<td><button onclick="deleteStudent(${students.indexOf(sv)})">Xóa</button></td>`;
+
+tbody.appendChild(tr);
+
+total += sv.score;
+
+});
+
+
+let avg = students.length ? (total/students.length).toFixed(2) : 0;
+
+document.getElementById("stat").innerHTML =
+"Tổng SV: "+students.length+" | Điểm TB: "+avg;
+
+}
+
+
+//Xóa
+function deleteStudent(index){
+
+students.splice(index,1);
+
+renderTable();
+
+}
+
+
+//Enter để thêm
+document.getElementById("score").addEventListener("keydown",function(e){
+
+if(e.key==="Enter"){
+addStudent();
+}
+
+});
+
+</script>
+
+</body>
+</html>
